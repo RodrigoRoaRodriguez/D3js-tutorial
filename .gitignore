@@ -1,3 +1,14 @@
+# OS metafiles
+.DS_STORE
+Thumbs.db
+
+# Editor meta-files
+*.sublime-project
+*.sublime-workspace
+.idea
+*.iml
+.vscode
+
 # Logs
 logs
 *.log
