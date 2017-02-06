@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body{background-color: #fcc;}
+svg#the-right-svg{background-color: #dfd;}
+svg#the-wrong-svg{background-color: #faa;}
+svg#the-right-svg text {font: bold 100px monospace;}
+text.right{fill:green;}
+</style>
+<h1 style="font: bold 2em monospace">EXERCISE 1</h1>
+<svg id="the-wrong-svg" width="200" height="200"></svg>
+<svg id="the-right-svg" width="600" height="600"><text style="font: bold 15px monospace; fill:red;" x="10" y="580">DON'T mess with me</text></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+//  EXERCISE DESCRIPTION:
+//  Print 1,2,3 on a SVG canvas
+//  SUBJECTS COVERED
+//    - d3 selections
+//    - data binding
+//    - d3.selection.attr() and d3.selection.style()
+//    - String parsing/coersion
+
+// STEP 1: get our data in the application
+// Lets this be our data, in d3 you use data to create what is on the DOM
+const MY_DATA = [1,2,3]
+
+// STEP 2: select the svg tag
+// Let's start by selecting our SVG tag.
+// d3-selections are not NOT normal DOM selections.
+// d3-selections are special DOM selections because DOM elements
+// can be paired with corresponding data elements:
+//  d3.select() behaves like devtool's $():
+//    it selects the first matching elements
+//  d3.selectAll() behaves like devtool's $$():
+//    it selects all matching elements
+let datalessSvg = d3.select('#the-right-svg')
+
+//STEP 3: make a new selection where every element in your data is paired to a // text (selecting all texts tags just specifies which DOM elements should be
+// paired to the data. Give them a class to avoid confusion and bugs)
+let pairDataToTexts = datalessSvg.selectAll('text.right').data(MY_DATA)
+
+//STEP 4: make a new selection for only NEW elements in the data.
+let forEveryNewDatum = pairDataToTexts.enter() // datum == data element
+
+//STEP 5: append a classed text element for every new element in the data.
+let myTexts = forEveryNewDatum.append('text')
+  .attr('class', 'right')
+  .text(datum => datum.toString())
+
+//STEP 6: style your texts (you could have done this on the previous step)
+let fontSize = 200;
+myTexts
+  .attr('y', fontSize)
+  .style('font', `bold ${fontSize}px monospace`)
+  .attr('x', (dataElement, index) => index * fontSize)
+
+// GOOD to know:
+// Calling attr and style without a second arguments will retrieve the value!
+console.log(myTexts.attr('y'), myTexts.style('font'))
+
+// CAVEAT: attr and style return values as strings... (This prints: 200100)
+console.log('String concatenation:', myTexts.attr('y')+100)
+// Strings can parsed into numbers with parseInt() or parseFloat()
+console.log('Sum from parsed value:', Number.parseInt(myTexts.attr('y'))+100)
+// Or as you will see in many bl.ocks coerced into numbers with unary +
+console.log('Sum from coerced value:', +myTexts.attr('y')+100)
+// Also Number(string), Math.floor(string), Math.ceiling(string),
+// Math.round(string) will all do some sort of parsing (your milage may vary).
+</script>

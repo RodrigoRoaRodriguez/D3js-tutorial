@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+text {
+  font: bold 30px monospace;
+}
+
+.enter {
+  fill: green;
+}
+
+.update {
+  fill: #333;
+}
+
+</style>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<body>
+<script>
+path = './'
+let exercises = [
+  {
+    title: 'exercise1.html',
+    description: 'exercise1.html',
+    filename: 'exercise1.html'
+  },
+  {
+    title: 'exercise2.html',
+    description: 'exercise2.html',
+    filename: 'exercise2.html'
+  },
+]
+
+d3.select('body').append('h1').text('Under Construction!')
+let main = d3.select('body').append('main')
+let divs = main.selectAll('div').data(exercises).enter().append('div')
+
+
+
+</script>
