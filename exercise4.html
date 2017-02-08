@@ -40,10 +40,6 @@ function update(data) {
   // EXIT are the elements that are no longer present in the data.
   let forEachGone = forEachOld.exit()
 
-  // UPDATE selections are mythological beings that don't exist in D3. But
-  // anthing you do on the *paired selection* will apply to both OLD and NEW
-  // data elements, but not those that are gone.
-
   // Color them: make old black, new green and removed red.
   forEachGone.attr('fill', 'crimson') // Removed to red
   forEachNew.attr('fill', 'green') // New to green
