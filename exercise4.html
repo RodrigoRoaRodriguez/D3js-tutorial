@@ -7,9 +7,9 @@ svg#the-wrong-svg{background-color: #faa;}
 svg#the-right-svg text {font: bold 10px monospace;}
 tspan.right{stroke-width: 2px; stroke:green;}
 </style>
-<h1 style="font: bold 2em monospace">EXERCISE 2</h1>
+<h1 style="font: bold 2em monospace">EXERCISE 4</h1>
 <svg id="the-wrong-svg" width="200" height="200"></svg>
-<svg id="the-right-svg" width="80vw" height="80vh" viewbox="-50 -50 100 100"><text style="font: bold 15px monospace;" x="10" y="580">Do <tspan style="fill:red;">NOT</tspan> mess with me</text></svg>
+<svg id="the-right-svg" width="80vw" height="60vw" viewbox="-50 -50 100 100"><text style="font: bold 2px monospace;" x="42" y="50">Do <tspan style="fill:red;">NOT</tspan> mess with me</text></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 //  EXERCISE DESCRIPTION:
@@ -24,15 +24,19 @@ let tenNumbers = d3.range(10)
 let svg = d3.select('svg#the-right-svg')
 
 function update(data) {
-
+  console.log(data)
   const FONT_SIZE = 10
+
   let myTransition = d3.transition() //Tell d3 to interpolate properties
       .duration(1000) // The time in through which this interpolation ocurrs.
 
   // Pair DOM elements and data, in this case texts and numbers, respectively,
   // if there are any old elements it also JOINs new data with old elements.
   // For some reason this returns the UPDATE selection
-  let forEachOld = svg.selectAll('text.numbers').data(data)
+  let forEachOld = svg.selectAll('text.numbers').data(data, d=>d)
+  // The second argument in data is the key. It tells d3 how to recognize
+  // elements, D3 defaults to index with DEVASTATING consequences.
+
   // calling .enter() on the paired selection returns the ENTER selection.
   // ENTER are the new elements that were not in the data before.
   let forEachNew = forEachOld.enter().append('text').attr('class','numbers')
@@ -60,16 +64,16 @@ function update(data) {
   forEachGone
     .transition(myTransition) //Animate it so that you see what happens
     .style('fill-opacity', 0) // Fade away
-    .attr('y', -40) // Move up
+    .attr('y', -30) // Move up
     .remove() // Remove from the DOM
 
+  //The last thing left to do is to animate the new elements.
   forEachNew
-    .attr('y', 40) // Move down
-    .style('fill-opacity', 0) // Start transparent
-  .transition(myTransition) //Animate it so that you see what happens
+    .attr('y', 30) // Move down
+    // .style('fill-opacity', 0) // Start transparent
+    .transition(myTransition) //Animate it so that you see what happens
     .attr('y', 0) // Move towards the center
-    .style('fill-opacity', 1) // Fade in
-
+    // .style('fill-opacity', 1) // Fade in
 }
 
 // Start with all ten numbers on the screen
