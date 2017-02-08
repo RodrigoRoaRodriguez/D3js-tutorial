@@ -36,16 +36,18 @@ let pairRowsToTexts = datalessSvg.selectAll('text.right').data(fixData(BAD_DATA)
 
 //STEP 4: make a new selection for new ROWS in the data.
 let forEveryNewRow = pairRowsToTexts.enter()
+  .append('text')
+  .attr('class', 'right')
 
 //STEP 5: Style your rows
-let fontSize = 125;
-let myTexts = forEveryNewRow.append('text')
-  .attr('class', 'right')
+let fontSize = 125
+
+forEveryNewRow
   .style('fill', (_,i) => d3.schemeCategory10[i])
   .attr('y', (dataElement, index) => (index+1) * fontSize)
 
 //STEP 6: pair each datum to a <tspan>.
-let pairDataToTspans = myTexts.selectAll('tspan.right')
+let pairDataToTspans = forEveryNewRow.selectAll('tspan.right')
   .data(row => row)
 
 //STEP 7: make a new selection for NEW entries in the data.

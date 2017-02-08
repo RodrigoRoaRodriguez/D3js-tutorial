@@ -2,106 +2,89 @@
 <meta charset="utf-8">
 <style>
 body{background-color: #fcc;}
-svg{display:block}
 svg#the-right-svg{background-color: #dfd;}
 svg#the-wrong-svg{background-color: #faa;}
-tspan {font-family:monospace; fill:#dfd;}
+svg#the-right-svg text {font: bold 10px monospace;}
+tspan.right{stroke-width: 2px; stroke:green;}
 </style>
-<h1 style="font: bold 2em monospace">EXERCISE 4</h1>
-<svg id="the-wrong-svg" width="175" height="10"></svg>
-<svg id="the-right-svg" width="80vw" height="40vw" viewbox="0 0 400 200">
-</svg>
+<h1 style="font: bold 2em monospace">EXERCISE 2</h1>
+<svg id="the-wrong-svg" width="200" height="200"></svg>
+<svg id="the-right-svg" width="80vw" height="80vh" viewbox="-50 -50 100 100"><text style="font: bold 15px monospace;" x="10" y="580">Do <tspan style="fill:red;">NOT</tspan> mess with me</text></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 //  EXERCISE DESCRIPTION:
-//  create appropiate scales and color schemes for each series.
+//  Constantly resampled list of characters like the one made by Mike Bostock:
+//    https://bl.ocks.org/mbostock/3808234
 //
 //  SUBJECTS COVERED
-//    - d3.range
-//    - mapping repetition (short, I promise)
-//    - d3.scales
-//    - color schemes
+//    - Updating existing elements
+//    - selection.exit()
 
-// This time I will generate the data using the convenient d3.range
-const DATA = d3.range(9) // [0, 1, 2, 3, 4, 5, 6, 7, 8]
-// PART 1: Modifying your data.
-// Lets declare some functions that modify our data
-let id,
-to10to90by10,
-toLetters,
-toMinus4ToPlus4,
-toSquares,
-toLogarithmsOf2,
-toExponentialsOf2
+let tenNumbers = d3.range(10)
+let svg = d3.select('svg#the-right-svg')
 
-// Sometimes the data is just the way you want it to.
-id = d => d; // [0, 1, 2, 3, 4, 5, 6, 7, 8]
-// But sometimes it is not.
-to10to90by10 = d=>(d+1)*10 //[10, 20, 30, 40, 50, 60, 70, 80, 90]
+function update(data) {
 
-// The signature for range is actually d3.range([start,] stop [,step]), however
-// it turns out that it tends to be a bad idea to actually use them as the
-// number of elements returned might not be the one expected, due to an
-// unreachable stop and/or floating point errors. So instead of using d3.range
-// to complete this  part of the exercise you should map the data to a function,
-// which gives you lot freedom for instance the function below maps it to the
-// first nine letters in the alphabet.
-toLetters = d=>(d+10).toString(36).toUpperCase() // ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+  const FONT_SIZE = 10
+  let myTransition = d3.transition() //Tell d3 to interpolate properties
+      .duration(1000) // The time in through which this interpolation ocurrs.
 
-// Now, come up with functions that map DATA to the following:
-toMinus4ToPlus4 = d=>(d-4) //[-4, -3, -2, -1, 0, 1, 2, 3, 4]
-toSquares = d=>(d**2) //[0, 1, 4, 9, 16, 25, 36, 49, 64]
-toLogarithmsOf2 = d=>Math.log2(d+1) //[Math.log2(1)... Math.log2(10)]
-toExponentialsOf2 = d=>(2**d) //[1, 2, 4, 8, 16, 32, 64, 128, 256]
+  // Pair DOM elements and data, in this case texts and numbers, respectively,
+  // if there are any old elements it also JOINs new data with old elements.
+  // For some reason this returns the UPDATE selection
+  let forEachOld = svg.selectAll('text.numbers').data(data)
+  // calling .enter() on the paired selection returns the ENTER selection.
+  // ENTER are the new elements that were not in the data before.
+  let forEachNew = forEachOld.enter().append('text').attr('class','numbers')
+  // calling .exit on the paired selection returns the EXIT selection.
+  // EXIT are the elements that are no longer present in the data.
+  let forEachGone = forEachOld.exit()
 
-// PART 2: A better way of doing it
-// My nineLetters anonymous function might seem like a good idea, but what if
-// some malicious soul decided to add float or objects as data? Maybe you need
-// to add or remove the elements dynamically, cap the output values if the
-// input element it beyond the domain values, or perhaps you would like to map
-// to completely arbitrary elements without lenghthy switches, convoluted
-// if-trees or unwieldy indexes.
-//
-// That's where d3.scales comes in: they are one of the most powerful and useful
-// tools in the ENTIRE d3 toolset.
+  // UPDATE selections are mythological beings that don't exist in D3. But
+  // anthing you do on the *paired selection* will apply to both OLD and NEW
+  // data elements, but not those that are gone.
 
-// So here is a d3 scale that would yield from10to90by10
-to10to90by10 = d3.scaleLinear() // This is a linear scale
-  .domain([0,8]) // What goes IN
-  .range([10,90]) // What comes OUT
+  // Color them: make old black, new green and removed red.
+  forEachGone.attr('fill', 'crimson') // Removed to red
+  forEachNew.attr('fill', 'green') // New to green
+  forEachOld.attr('fill', 'navy') // Old to black
 
-// Even the nine letters map could be done with a d3 scale:
-toLetter = d3.scaleOrdinal() // tell it that it is a discrete scale
-  .domain(DATA) // Domain is what goes IN.
-  .range(DATA.map(d=>(d+10).toString(36).toUpperCase())) // Range what goes OUT
-  .unknown('') // Opional: return an empty string when value is not in domain.
+  const centerText = (_, i) => (i - data.length/2) * FONT_SIZE
+  // Now lets place the texts right and fill them with numbers
+  forEachNew
+    .attr('x', centerText)
+    .text(d => d)
 
-// The above doesn't break if you send in float or objects and is configurable
-// Be aware that d3.scales are FUNCTIONS, so the way you use them is the same:
-// let nineLetters = DATA.map(toLetter)//["A","B","C","D","E","F","G","H","I"]
+  // However every old element will need to have it's position recalculated
+  forEachOld
+    .transition(myTransition) //Animate it so that you see what happens
+    .attr('x', centerText)
 
-// Now go and read on the d3-scale documentation and create scales that output
-// the same as your functions.
-// toSquares = d3.scalePow()
-//   .exponent(2)
+  // And every element no longer in the data must be removed from the DOM
+  forEachGone
+    .transition(myTransition) //Animate it so that you see what happens
+    .style('fill-opacity', 0) // Fade away
+    .attr('y', -40) // Move up
+    .remove() // Remove from the DOM
 
+  forEachNew
+    .attr('y', 40) // Move down
+    .style('fill-opacity', 0) // Start transparent
+  .transition(myTransition) //Animate it so that you see what happens
+    .attr('y', 0) // Move towards the center
+    .style('fill-opacity', 1) // Fade in
 
+}
 
-let allMyData = [
-  DATA.map(id), // [0, 1, 2, 3, 4, 5, 6, 7, 8]
-  DATA.map(to10to90by10), //[10, 20, 30, 40, 50, 60, 70, 80, 90]
-  DATA.map(toMinus4ToPlus4), //[-4, -3, -2, -1, 0, 1, 2, 3, 4]
-  DATA.map(toSquares), //[0, 1, 4, 9, 16, 25, 36, 49, 64]
-  DATA.map(toLogarithmsOf2), //[Math.log2(1)... Math.log2(10)]
-  DATA.map(toExponentialsOf2) //[1, 2, 4, 8, 16, 32, 64, 128, 256]
-]
+// Start with all ten numbers on the screen
+update(tenNumbers)
 
-// PART 2: Color scales for your data. Choosing the right color scheme.
-// Here is a webpage that sumarizes color schemes
-//https://web.natur.cuni.cz/~langhamr/lectures/vtfg1/mapinfo_2/barvy/colors.html
-// And here are three pages explaining the evils of HSL, HSB... etc:
-// 
-
+// Grab a random sample from the ten numbers every tree seconds (3000ms)
+d3.interval(function() {
+  update(d3.shuffle(tenNumbers)
+      .slice(0, Math.floor(Math.random()*tenNumbers.length))
+      .sort());
+}, 3000);
 
 
 </script>
