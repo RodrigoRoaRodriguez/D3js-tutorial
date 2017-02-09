@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body{background-color: #fcc;}
+svg{display:block}
+svg#the-right-svg{background-color: #dfd;}
+svg#the-wrong-svg{background-color: #faa;}
+tspan {font-family:monospace;}
+</style>
+<h1 style="font: bold 2em monospace">EXERCISE 5</h1>
+<svg id="the-wrong-svg" width="175" height="10"></svg>
+<svg id="the-right-svg" width="80vw" height="800vw" viewbox="0 0 100 1000">
+</svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+//  EXERCISE DESCRIPTION:
+//  create appropiate scales and color schemes for each series.
+//
+//  SUBJECTS COVERED
+//    - d3.range
+//    - mapping repetition (short, I promise)
+//    - d3.scales
+//    - color schemes
+
+// This time I will generate the data using the convenient d3.range
+const DATA = d3.range(9) // [0, 1, 2, 3, 4, 5, 6, 7, 8]
+// PART 1: Modifying your data.
+// Lets declare some functions that modify our data
+let id,
+to10to90by10,
+toLetters,
+toMinus4ToPlus4,
+toSquares,
+toLogarithmsOf2,
+toExponentialsOf2
+
+// Sometimes the data is just the way you want it to.
+id = d => d; // [0, 1, 2, 3, 4, 5, 6, 7, 8]
+// But sometimes it is not.
+to10to90by10 = d=>(d+1)*10 //[10, 20, 30, 40, 50, 60, 70, 80, 90]
+
+// The signature for range is actually d3.range([start,] stop [,step]), however
+// it turns out that it tends to be a bad idea to actually use them as the
+// number of elements returned might not be the one expected, due to an
+// unreachable stop and/or floating point errors. So instead of using d3.range
+// to complete this  part of the exercise you should map the data to a function,
+// which gives you lot freedom for instance the function below maps it to the
+// first nine letters in the alphabet.
+toLetters = d=>(d+10).toString(36).toUpperCase() // ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+
+// Now, come up with functions that map DATA to the following:
+toMinus4ToPlus4 = d=>(d-4) //[-4, -3, -2, -1, 0, 1, 2, 3, 4]
+toSquares = d=>(d**2) //[0, 1, 4, 9, 16, 25, 36, 49, 64]
+toLogarithmsOf2 = d=>Math.log2(d+1) //[Math.log2(1)... Math.log2(10)]
+toExponentialsOf2 = d=>(2**d) //[1, 2, 4, 8, 16, 32, 64, 128, 256]
+
+// PART 2: A better way of doing it
+// My nineLetters anonymous function might seem like a good idea, but what if
+// some malicious soul decided to add float or objects as data? Maybe you need
+// to add or remove the elements dynamically, cap the output values if the
+// input element it beyond the domain values, or perhaps you would like to map
+// to completely arbitrary elements without lenghthy switches, convoluted
+// if-trees or unwieldy indexes.
+//
+// That's where d3.scales comes in: they are one of the most powerful and useful
+// tools in the ENTIRE d3 toolset.
+
+// So identity is the simplest one, it has very little available configuration
+id = d3.scaleIdentity()
+
+// Linear scales allow to to map linearly between from a given domain to a range
+// So here is a d3 scale that would yield from10to90by10:
+to10to90by10 = d3.scaleLinear() // This is a linear scale
+  .domain([0,8]) // What goes IN
+  .range([10,90]) // What comes OUT
+
+// If you ever need your scale to discrete for some reason use oridinal scales.
+// For example the nine letters map could be done as follows.
+toLetter = d3.scaleOrdinal() // tell it that it is a discrete scale
+  .domain(DATA) // Domain is what goes IN.
+  .range(DATA.map(d=>(d+10).toString(36).toUpperCase())) // Range what goes OUT
+  .unknown('') // Opional: return an empty string when value is not in domain.
+
+// The above doesn't break if you send in float or objects and is configurable
+
+toMinus4ToPlus4 = d3.scaleLinear() // This is a linear scale
+  .domain([0,8]) // What goes IN
+  .range([-4,4]) // What comes OUT
+
+
+toSquares = d3.scalePow()
+  .exponent(2) // Set the exponent
+
+toLogarithmsOf2 = d3.scaleLog()
+  .domain([1,8])// WARNING: a domain that encompasses 0 will ONLY yield NaNs!!!
+  .range([0,3]) // because 1 == 2**0 and 8 == 2**3 so [log2(0), log2(8)]
+
+// However exponential scales do not exist in d3. But nevertheless an inverted
+// logarithmic scale IS an exponential scale. When you invert an scale you get
+// the inverse function with reversed range and domain.
+toExponentialsOf2 = d3.scaleLog()
+  .domain([1,2**8]) // will become range
+  .range([0, 8]) // will become domain
+  .invert // N.B no parentheses or you will be sending an `undefined`.
+
+
+let allMyData = [
+  DATA.map(id), // [0, 1, 2, 3, 4, 5, 6, 7, 8]
+  DATA.map(to10to90by10), //[10, 20, 30, 40, 50, 60, 70, 80, 90]
+  DATA.map(toMinus4ToPlus4), //[-4, -3, -2, -1, 0, 1, 2, 3, 4]
+  DATA.map(toLetters),// ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+  DATA.map(toSquares), //[0, 1, 4, 9, 16, 25, 36, 49, 64]
+  DATA.map(toLogarithmsOf2), //[Math.log2(1)... Math.log2(10)]
+  DATA.map(toExponentialsOf2) //[1, 2, 4, 8, 16, 32, 64, 128, 256]
+]
+
+// Lets do what we did on exercise 2 and see what happens...
+// STEP I: select right svg canvas and pair the right texts.
+let datalessSvg = d3.select('#the-right-svg')
+let pairRowsToTexts = datalessSvg.selectAll('text.right').data(allMyData)
+
+//STEP II: make a new selection for new ROWS in the data.
+let forEveryNewRow = pairRowsToTexts.enter()
+
+//STEP III: Style your rows
+let fontSize = 5
+let myTexts = forEveryNewRow.append('text')
+  .attr('class', 'right')
+  .style('fill', (_,i) => d3.schemeCategory10[i])
+  .attr('y', (dataElement, index) => 2*(index+1) * fontSize)
+
+//STEP IV: pair each datum to a <tspan>.
+let pairDataToTspans = myTexts.selectAll('tspan.right')
+  .data(row => row)
+
+//STEP V: make a new selection for NEW entries in the data.
+let forEveryNewDatum = pairDataToTspans.enter()
+//STEP VI: append a <tspan> for every new datum in the rows
+let myTspans = forEveryNewDatum.append('tspan').text(dataElement => dataElement.toString())
+
+//STEP VII: style your tspans
+myTspans
+  .attr('class', 'right')
+  .attr('x', (dataElement, index) => 2*(index+.5) * fontSize)
+  .style('font', `bold ${fontSize}px monospace`)
+
+// So we notice that text is not always the best idea when it comes to
+// visualizing data. In this case you would probably use a linecharts (plural
+// because otherwise your y-scale would be unsuitable for visualization).
+
+// PART 3: Color scales
+// however since I want to teach you  now we will just use a dot matrix visualization and encode our
+// variables to color.
+
+
+let moveBelow = datalessSvg.append('g')
+  .attr('transform', `translate(0,${2*(allMyData.length+.5) * fontSize})`)
+
+let pairRowsToGroups = moveBelow.selectAll('g.row').data(allMyData)
+
+//STEP II: make a new selection for new ROWS in the data.
+let forNewRows = pairRowsToTexts.enter().append('g').attr('class', 'row')
+
+
+
+  .style('fill', (_,i) => d3.schemeCategory10[i])
+  .attr('y', (dataElement, index) => 2*(index+1) * fontSize)
+
+//STEP IV: pair each datum to a <tspan>.
+pairDataToTspans = myTexts.selectAll('tspan.right')
+  .data(row => row)
+
+//STEP V: make a new selection for NEW entries in the data.
+forEveryNewDatum = pairDataToTspans.enter()
+//STEP VI: append a <tspan> for every new datum in the rows
+myTspans = forEveryNewDatum.append('tspan').text(dataElement => dataElement.toString())
+
+//STEP VII: style your tspans
+myTspans
+  .attr('class', 'right')
+  .attr('x', (dataElement, index) => 2*(index+.5) * fontSize)
+  .style('font', `bold ${fontSize}px monospace`)
+
+
+// PART 4: Color schemes for your data. Choosing the right color scheme is not
+// easy.
+//
+// Here is a webpage that sumarizes different kinds types of color schemes:
+//https://web.natur.cuni.cz/~langhamr/lectures/vtfg1/mapinfo_2/barvy/colors.html
+//
+// A couple of pages explaining the evils of HSL, HSB... etc:
+// https://eagereyes.org/basics/rainbow-color-map
+// http://vis4.net/blog/posts/avoid-equidistant-hsv-colors/
+//
+// And a series of articles for those that really want to understand:
+// http://earthobservatory.nasa.gov/blogs/elegantfigures/2013/08/05/subtleties-of-color-part-1-of-6/
+
+//Rodrigo's tip of the day: for good color schemes use scales with one of d3
+// built in interpolate functions! Avoid RGB and HSL interpolation like the
+// plague. Even if you want to make your own custom scheme you should override
+// the default with one of these:
+//     .interpolate(d3.interpolateHcl)
+//     .interpolate(d3.interpolateLab)
+//  .interpolate(d3.interpolateCubehelix) //<-pseudocode: see docs for this one.
+
+</script>

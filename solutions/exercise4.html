@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body{background-color: #fcc;}
+svg#the-right-svg{background-color: #dfd;}
+svg#the-wrong-svg{background-color: #faa;}
+svg#the-right-svg text {font: bold 10px monospace;}
+tspan.right{stroke-width: 2px; stroke:green;}
+</style>
+<h1 style="font: bold 2em monospace">EXERCISE 4</h1>
+<svg id="the-wrong-svg" width="200" height="200"></svg>
+<svg id="the-right-svg" width="80vw" height="60vw" viewbox="-50 -50 100 100"><text style="font: bold 2px monospace;" x="42" y="50">Do <tspan style="fill:red;">NOT</tspan> mess with me</text></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+//  EXERCISE DESCRIPTION:
+//  Constantly resampled list of characters like the one made by Mike Bostock:
+//    https://bl.ocks.org/mbostock/3808234
+//
+//  SUBJECTS COVERED
+//    - Updating existing elements
+//    - selection.exit()
+
+let tenNumbers = d3.range(10)
+let svg = d3.select('svg#the-right-svg')
+
+function update(data) {
+  console.log(data)
+  const FONT_SIZE = 10
+
+  let myTransition = d3.transition() //Tell d3 to interpolate properties
+      .duration(1000) // The time in through which this interpolation ocurrs.
+
+  // Pair DOM elements and data, in this case texts and numbers, respectively,
+  // if there are any old elements it also JOINs new data with old elements.
+  // For some reason this returns the UPDATE selection
+  let forEachOld = svg.selectAll('text.numbers').data(data, d=>d)
+  // The second argument in data is the key. It tells d3 how to recognize
+  // elements, D3 defaults to index with DEVASTATING consequences.
+
+  // calling .enter() on the paired selection returns the ENTER selection.
+  // ENTER are the new elements that were not in the data before.
+  let forEachNew = forEachOld.enter().append('text').attr('class','numbers')
+  // calling .exit on the paired selection returns the EXIT selection.
+  // EXIT are the elements that are no longer present in the data.
+  let forEachGone = forEachOld.exit()
+
+  // Color them: make old black, new green and removed red.
+  forEachGone.attr('fill', 'crimson') // Removed to red
+  forEachNew.attr('fill', 'green') // New to green
+  forEachOld.attr('fill', 'navy') // Old to black
+
+  const centerText = (_, i) => (i - data.length/2) * FONT_SIZE
+  // Now lets place the texts right and fill them with numbers
+  forEachNew
+    .attr('x', centerText)
+    .text(d => d)
+
+  // However every old element will need to have it's position recalculated
+  forEachOld
+    .transition(myTransition) //Animate it so that you see what happens
+    .attr('x', centerText)
+
+  // And every element no longer in the data must be removed from the DOM
+  forEachGone
+    .transition(myTransition) //Animate it so that you see what happens
+    .style('fill-opacity', 0) // Fade away
+    .attr('y', -30) // Move up
+    .remove() // Remove from the DOM
+
+  //The last thing left to do is to animate the new elements.
+  forEachNew
+    .attr('y', 30) // Move down
+    // .style('fill-opacity', 0) // Start transparent
+    .transition(myTransition) //Animate it so that you see what happens
+    .attr('y', 0) // Move towards the center
+    // .style('fill-opacity', 1) // Fade in
+}
+
+// Start with all ten numbers on the screen
+update(tenNumbers)
+
+// Grab a random sample from the ten numbers every tree seconds (3000ms)
+d3.interval(function() {
+  update(d3.shuffle(tenNumbers)
+      .slice(0, Math.floor(Math.random()*tenNumbers.length))
+      .sort());
+}, 3000);
+
+
+</script>

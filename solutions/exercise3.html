@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body{background-color: #fcc;}
+svg{display:block}
+svg#the-right-svg{background-color: #dfd;}
+svg#the-wrong-svg{background-color: #faa;}
+tspan {font-family:monospace; fill:#dfd;}
+</style>
+<!--
+EXERCISE DESCRIPTION:
+How to make responsive visualizations. I provide you with a treemap made from
+the doodle data for this tutorial. Your job is to make it responsive.
+SUBJECTS COVERED
+  - coordinate systems.
+  - svg viewbox.
+  - svg width and height.
+-->
+<h1 style="font: bold 2em monospace">EXERCISE 3</h1>
+<svg id="the-wrong-svg" width="400" height="200"></svg>
+<svg id="the-right-svg" width="80vw" height="40vw" viewbox="0 0 400 200">
+</svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+let DATA = [
+  {date:'Mon 6',  time: '10:00 AM – 12:00 PM', count:12},
+  {date:'Mon 6',  time: '1:00 PM – 3:00 PM', count:8},
+  {date:'Mon 6',  time: '3:00 PM – 5:00 PM', count:15},
+  {date:'Tue 7',  time: '8:00 AM – 10:00 AM', count:10},
+  {date:'Tue 7',  time: '3:00 PM – 5:00 PM', count:12},
+  {date:'Wed 8',  time: '11:00 AM – 1:00 PM', count:11},
+  {date:'Wed 8',  time: '3:00 PM – 5:00 PM', count:15},
+  {date:'Thu 9',  time: '1:00 PM – 3:00 PM', count:14},
+  {date:'Thu 9',  time: '3:00 PM – 5:00 PM', count:25},
+]
+// This time around I have made all the visualization for you. However your job
+// is to figure out how to move it from the wrong svg to the right one and
+// scale it accordingly without modifying my visualization (Yes! This means you
+// can make almost any visualization responsive with very little work)
+let myTreemap = new RodrigoTreemap(DATA)
+
+//Select an SVG
+let pixelSvg = d3.select('#the-wrong-svg')
+
+myTreemap.drawOnSVG(pixelSvg)
+
+/**
+ *  There is now a treemap on the svg canvas. But it is likely of the wrong size
+ *  becuase the svg canvas has width and height that change with the size of
+ *  the window, while the coordinate system inside the SVG is in absolute
+ *  pixels. Pixel coordinates are not responsive and have a fixed origin point.
+ *  However SVGs do not need to use pixels. They can have their own coordinate
+ *  systems. To define a coordinate system use the viewbox attribute:
+ *    <svg ... viewbox = "x-min y-min width height">
+ *  NB. width != x-max and height !=y-max, but also that the top left corner
+ *  has the coordinate x-min, y-min.
+ */
+let responsiveSvg = d3.select('#the-right-svg')
+myTreemap.drawOnSVG(responsiveSvg)
+
+// The code below might fly over your heads right now. Ask me about it
+// later if you really want to understand it. We don't have time now.
+// BTW. The hard-coding is to frustrate trivial approaches to responsiveness.
+function RodrigoTreemap(data){
+  // The lines below make structured that data into a hierachical datatype
+  let makeNested = d3.nest().key(d=>d.date)
+  let NestedData = makeNested.entries(data)
+
+  let root = {
+    key: 'Doodle votes',
+    values: NestedData,
+  }
+  let hierarchicalData = d3.hierarchy(root, d=>d.values).sum(d=>d.count).sort( (a,b)=>b.count-a.count)
+  // The layout adds the info necessary to draw the treemap
+  let makeTreemap = d3.treemap().size([400,200]).padding([2])
+  this.treemapData = makeTreemap(hierarchicalData, d=>d.count)
+
+  this.drawOnSVG = (svg) =>{
+    let colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+    let perTime = svg.selectAll('g')
+        .data(this.treemapData.leaves())
+        .enter().append('g')
+          .attr('transform', d => 'translate(' + d.x0 + ',' + d.y0 + ')')
+
+
+    perTime.append('rect')
+        .attr('id', d => d.data.key)
+        .attr('width', d => d.x1 - d.x0)
+        .attr('height', d => d.y1 - d.y0)
+        .attr('fill', d=>colorScale(d.parent.data.key))
+
+    let labels = perTime.append('text')
+
+    labels.append('tspan')
+      .attr('dy', '1em')
+      .attr('x', 8)
+      .style('font-weight', 'bold')
+      .text(d=>d.parent.data.key)
+
+    labels.selectAll('tspan.time').data(d=>d.data.time.split('–')).enter()
+      .append('tspan')
+      .attr('class', 'time')
+      .attr('dy', '1em')
+      .attr('x', 12)
+      .style('font-size', 11)
+      .text(d=>d)
+  }
+}
+
+
+
+</script>
