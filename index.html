@@ -1,41 +1,52 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>D3 tutorial</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="card card-outline-primary col-10 mx-auto text-center">
+  <div class="card-block">
+      <h1 style="font: bold 3em monospace"><a href="https://d3js.org">D3.js</a> Tutorial</h1>
+  </div>
+</div>
 
-text {
-  font: bold 30px monospace;
-}
+      <div class="card card-inverse col-10 mx-auto" style="background-color: #333; border-color: #333;">
+        <div class="card-block">
+          <h3 class="card-title">Placeholder title</h3>
+          <p class="card-text">Placeholder description</p>
+          <a href="#" class="btn btn-primary">See solution</a>
+        </div>
+      </div>
+      <div class="card card-inverse col-10 mx-auto" style="background-color: #333; border-color: #333;">
+        <div class="card-block">
+          <h3 class="card-title">Placeholder title</h3>
+          <p class="card-text">Placeholder description</p>
+          <a href="#" class="btn btn-primary">See solution</a>
+        </div>
+      </div>
 
-.enter {
-  fill: green;
-}
-
-.update {
-  fill: #333;
-}
-
-</style>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<body>
-<script>
-path = './'
-let exercises = [
-  {
-    title: 'exercise1.html',
-    description: 'exercise1.html',
-    filename: 'exercise1.html'
-  },
-  {
-    title: 'exercise2.html',
-    description: 'exercise2.html',
-    filename: 'exercise2.html'
-  },
-]
-
-d3.select('body').append('h1').text('Under Construction!')
-let main = d3.select('body').append('main')
-let divs = main.selectAll('div').data(exercises).enter().append('div')
-
-
-
-</script>
+  </body>
+  <script>
+  path = './'
+  let exercises = [
+    {
+      title: 'exercise1.html',
+      description: 'exercise1.html',
+      filename: 'exercise1.html'
+    },
+    {
+      title: 'exercise2.html',
+      description: 'exercise2.html',
+      filename: 'exercise2.html'
+    },
+  ]
+  let main = d3.select('body').append('main')
+  let divs = main.selectAll('div').data(exercises).enter().append('div')
+  </script>
+</html>
