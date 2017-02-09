@@ -9,44 +9,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   </head>
-  <body>
-    <div class="card card-outline-primary col-10 mx-auto text-center">
+  <body style="background-color: aliceblue; padding:3em;">
+    <div class="card card-outline-primary col-10 mx-auto text-center" >
   <div class="card-block">
       <h1 style="font: bold 3em monospace"><a href="https://d3js.org">D3.js</a> Tutorial</h1>
   </div>
 </div>
 
-      <div class="card card-inverse col-10 mx-auto" style="background-color: #333; border-color: #333;">
-        <div class="card-block">
-          <h3 class="card-title">Placeholder title</h3>
-          <p class="card-text">Placeholder description</p>
-          <a href="#" class="btn btn-primary">See solution</a>
-        </div>
-      </div>
-      <div class="card card-inverse col-10 mx-auto" style="background-color: #333; border-color: #333;">
-        <div class="card-block">
-          <h3 class="card-title">Placeholder title</h3>
-          <p class="card-text">Placeholder description</p>
-          <a href="#" class="btn btn-primary">See solution</a>
-        </div>
-      </div>
-
   </body>
   <script>
-  path = './'
+  path = './solutions/'
   let exercises = [
     {
-      title: 'exercise1.html',
-      description: 'exercise1.html',
+      title: 'Exercise 1',
+      description: 'Print 1,2,3 on a SVG canvas',
       filename: 'exercise1.html'
     },
     {
-      title: 'exercise2.html',
-      description: 'exercise2.html',
+      title: 'Exercise 2',
+      description: 'create a 4x4 half-square with the numbers from 0 to 9',
       filename: 'exercise2.html'
     },
+    {
+      title: 'Exercise 3',
+      description: 'How to make responsive visualizations.',
+      filename: 'exercise3.html'
+    },
+    {
+      title: 'Exercise 4',
+      description: 'Overview on ENTER, UPDATE and EXIT selections',
+      filename: 'exercise4.html'
+    },
+    {
+      title: 'Exercise 5',
+      description: 'Scales and colors schemes',
+      filename: 'exercise5.html'
+    },
+    {
+      title: 'Exercise 6',
+      description: 'Asynchronous operations. External data.',
+      filename: 'exercise6.html'
+    },
+    {
+      title: 'Exercise 7',
+      description: 'Visualize the Doodle data as a pie-chart!',
+      filename: 'exercise7.html'
+    },
   ]
+  
   let main = d3.select('body').append('main')
-  let divs = main.selectAll('div').data(exercises).enter().append('div')
+  let cards = main.selectAll('div').data(exercises).enter().append('div')
+      .attr('class', 'card card-inverse col-10 mx-auto')
+      .style('background-color', (_,i)=> d3.schemeCategory10[i])
+      .style('border-color', (_,i)=> d3.schemeCategory10[i])
+  .append('a')
+      .attr('href', d=> path+d.filename)
+    .append('div')
+      .attr('class', 'card-block text-center')
+
+  cards.append('h3')
+      .attr('class', 'card-title')
+      .text(d=>d.title)
+
+  cards.append('p')
+      .attr('class', 'card-text')
+      .text(d=>d.description)
+
+
   </script>
 </html>
